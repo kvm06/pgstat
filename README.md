@@ -41,11 +41,24 @@ create extension pg_cron;
 Создаем пользователя cron_user (для создания заданий и запуска функций) и даем необходимые права
 ```
 create user cron_user with password 'password';
-grant all privileges on database pgstatdb to cron_user;
+grant pg_read_all_stats to cron_user;
+grant all privileges on all tables in schema public to cron_user;
 ```
 В файле pg_hba.conf разрешаем пользователю подключаться к БД
 ```
 host    all             cron_user       127.0.0.1/32            trust
 ```
 Теперь можно создавать задания для запуска функций по расписанию. 
+SELECT cron.schedule(
+  '1 * * * *',
+  $$INSERT INTO cron_test VALUES ('Hello World', now() )$$
+);
+SELECT * FROM cron.job;
+SELECT cron.unschedule(2);
+SELECT * FROM cron.job_run_details
 
+### 3. Создаем задание на ежеминутное сохранение скриншотов из pg_stat_statements
+```SELECT cron.schedule(
+  '* * * * *',
+  $$CALL create_snapshot();$$;
+```
