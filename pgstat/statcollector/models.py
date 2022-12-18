@@ -161,3 +161,105 @@ class Statements (models.Model):
             models.UniqueConstraint(fields=['datecr', 'dbid', 'userid','queryid'], name='created_dbid_userid_queryid_unique')
         ]
 
+class Tickets(models.Model):
+    ticket_no = models.CharField(primary_key=True, max_length=13)
+    book_ref = models.ForeignKey('Bookings', models.DO_NOTHING, db_column='book_ref')
+    passenger_id = models.CharField(max_length=20)
+    passenger_name = models.TextField()
+    contact_data = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tickets'
+
+class Bookings(models.Model):
+    book_ref = models.CharField(primary_key=True, max_length=6)
+    book_date = models.DateTimeField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'bookings'
+
+class Flights(models.Model):
+    flight_id = models.AutoField(primary_key=True)
+    flight_no = models.CharField(max_length=6)
+    scheduled_departure = models.DateTimeField()
+    scheduled_arrival = models.DateTimeField()
+    departure_airport = models.ForeignKey('AirportsData', models.DO_NOTHING, db_column='departure_airport', related_name='departure_airport')
+    arrival_airport = models.ForeignKey('AirportsData', models.DO_NOTHING, db_column='arrival_airport', related_name='arrival_airport')
+    status = models.CharField(max_length=20)
+    aircraft_code = models.ForeignKey('AircraftsData', models.DO_NOTHING, db_column='aircraft_code')
+    actual_departure = models.DateTimeField(blank=True, null=True)
+    actual_arrival = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'flights'
+        constraints = [
+            models.UniqueConstraint(fields=['flight_no', 'scheduled_departure'], name='flights_flight_no_scheduled_departure_key')
+        ]
+
+class TicketFlights(models.Model):
+    ticket_no = models.OneToOneField('Tickets', models.DO_NOTHING, db_column='ticket_no', primary_key=True)
+    flight_id = models.IntegerField(unique=True)
+    fare_conditions = models.CharField(max_length=10)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'ticket_flights'
+        # unique_together = (('ticket_no', 'flight_id'),)
+        constraints = [
+            models.UniqueConstraint(fields=['ticket_no', 'flight_id'], name='ticket_flights_pkey')
+        ]
+
+class Seats(models.Model):
+    aircraft_code = models.OneToOneField('AircraftsData', models.DO_NOTHING, db_column='aircraft_code', primary_key=True)
+    seat_no = models.CharField(max_length=4)
+    fare_conditions = models.CharField(max_length=10)
+
+    class Meta:
+        managed = False
+        db_table = 'seats'
+        # unique_together = (('aircraft_code', 'seat_no'),)
+        constraints = [
+            models.UniqueConstraint(fields=['aircraft_code', 'seat_no'], name='seats_pkey')
+        ]
+
+class AircraftsData(models.Model):
+    aircraft_code = models.CharField(primary_key=True, max_length=3)
+    model = models.JSONField()
+    range = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'aircrafts_data'
+
+
+class AirportsData(models.Model):
+    airport_code = models.CharField(primary_key=True, max_length=3)
+    airport_name = models.JSONField()
+    city = models.JSONField()
+    coordinates = models.TextField()  # This field type is a guess.
+    timezone = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'airports_data'
+
+class BoardingPasses(models.Model):
+    ticket_no = models.CharField(primary_key=True, max_length=13)
+    flight = models.ForeignKey('TicketFlights', models.DO_NOTHING, to_field='flight_id')
+    boarding_no = models.IntegerField()
+    seat_no = models.CharField(max_length=4)
+
+    class Meta:
+        managed = False
+        db_table = 'boarding_passes'
+        # unique_together = (('ticket_no', 'flight'), ('flight', 'boarding_no'), ('flight', 'seat_no'),)
+        constraints = [
+            models.UniqueConstraint(fields=['ticket_no', 'flight'], name='boarding_passes_pkey'),
+            models.UniqueConstraint(fields=['flight', 'boarding_no'], name='boarding_passes_flight_id_boarding_no_key'),
+            models.UniqueConstraint(fields=['flight', 'seat_no'], name='boarding_passes_flight_id_seat_no_key')
+        ]
