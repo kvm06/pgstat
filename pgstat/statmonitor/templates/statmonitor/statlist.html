@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="stats_all">
+        <form method="GET">
+            <h4>Группировать запросы по:</h4>
+            <input type="checkbox" id="group_db_checkbox">
+            <label for="group_db_checkbox">Базе данных</label>
+            <input type="checkbox"  id="group_user_checkbox">
+            <label for="group_user_checkbox">Пользователям</label>
+            <input type="checkbox"  id="group_level_checkbox">
+            <label for="group_level_checkbox">Уровеню запроса</label>
+            <label for="period_select">По периоду</label>
+            <select name="period" id="period_select">
+              <option value="minute">Минута</option>
+              <option value="hour">Час</option>
+              <option value="day">День</option>
+              <option value="week">Неделя</option>
+              <option value="month">Месяц</option>
+            </select><br>
+<!--            {{ statements_filter.form.as_p }}-->
+            <input type="submit" value="Применить фильтр"/>
+        </form>
+        <table style="border:1px solid green; border-collapse:collapse">
+            <thead>
+            <tr>
+                <th style="border:1px solid green; padding: 5px" colspan="7"></th>
+                <th style="border:1px solid green; padding: 5px" colspan="3">Чтение с диска</th>
+                <th style="border:1px solid green; padding: 5px" colspan="3">Запись на диск</th>
+                <th style="border:1px solid green; padding: 5px" colspan="3">Попадание в кэш, %</th>
+            </tr>
+            <tr>
+                <th style="border:1px solid green; padding: 5px">Дата запроса</th>
+                <th style="border:1px solid green; padding: 5px">Пользователь</th>
+                <th style="border:1px solid green; padding: 5px">База данных</th>
+                <th style="border:1px solid green; padding: 5px">ID запроса</th>
+                <th style="border:1px solid green; padding: 5px">Выполнено запросов</th>
+                <th style="border:1px solid green; padding: 5px">Общее время выполнения, сек.</th>
+                <th style="border:1px solid green; padding: 5px">Общее кол-во строк</th>
+                <th style="border:1px solid green; padding: 5px">буферный кэш</th>
+                <th style="border:1px solid green; padding: 5px">временные таблицы</th>
+                <th style="border:1px solid green; padding: 5px">временные файлы</th>
+                <th style="border:1px solid green; padding: 5px">буферный кэш</th>
+                <th style="border:1px solid green; padding: 5px">временные таблицы</th>
+                <th style="border:1px solid green; padding: 5px">временные файлы</th>
+                <th style="border:1px solid green; padding: 5px">буферный кэш</th>
+                <th style="border:1px solid green; padding: 5px">временные таблицы</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for stat in statements %}
+                {% load filters %}
+                <tr>
+                    <td style="border:1px solid green; padding: 5px">{{stat.datecr}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.rolname}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.datname}}</td>
+                    <td style="border:1px solid green; padding: 5px"><a href="{% url 'query' stat.stat_id %}">{{stat.queryid}}</a></td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.calls}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.total_exec_time | ms_to_sec}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.rows}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.shared_blks_read_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.local_blks_read_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.temp_blks_read_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.shared_blks_written_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.local_blks_written_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.temp_bytes_written_size | pretty_size}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.shared_blks_hit_percent}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.local_blks_hit_percent}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

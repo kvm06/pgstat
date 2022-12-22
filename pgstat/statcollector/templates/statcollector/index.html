@@ -14,13 +14,11 @@
                 <th>dbid</th>
                 <th>toplevel</th>
                 <th>queryid</th>
-                <th>query</th>
                 <th>calls</th>
                 <th>total_exec_time</th>
                 <th>min_exec_time</th>
                 <th>max_exec_time</th>
                 <th>mean_exec_time</th>
-                <th>stddev_exec_time</th>
                 <th>rows</th>
             </tr>
             </thead>
@@ -32,19 +30,16 @@
                     <td>{{stat.dbid}}</td>
                     <td>{{stat.toplevel}}</td>
                     <td>{{stat.queryid}}</td>
-                    <td>{{stat.query}}</td>
                     <td>{{stat.calls}}</td>
                     <td>{{stat.total_exec_time}}</td>
                     <td>{{stat.min_exec_time}}</td>
                     <td>{{stat.max_exec_time}}</td>
                     <td>{{stat.mean_exec_time}}</td>
-                    <td>{{stat.stddev_exec_time}}</td>
                     <td>{{stat.rows}}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        <a href="{% url 'add' %}">Добавить файл</a>
     </div>
 </body>
 </html>

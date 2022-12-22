@@ -1,10 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+    <div class="stats_all">
+        <table>
+            <thead>
+            <tr>
+                <th>datecr</th>
+                <th>userid</th>
+                <th>dbid</th>
+                <th>toplevel</th>
+                <th>queryid</th>
+                <th>calls</th>
+                <th>total_exec_time</th>
+                <th>min_exec_time</th>
+                <th>max_exec_time</th>
+                <th>mean_exec_time</th>
+                <th>rows</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for stat in stats %}
+                <tr>
+                    <td>{{query.datecr}}</td>
+                    <td>{{query.userid}}</td>
+                    <td>{{stat.dbid}}</td>
+                    <td>{{stat.toplevel}}</td>
+                    <td>{{stat.queryid}}</td>
+                    <td>{{stat.calls}}</td>
+                    <td>{{stat.total_exec_time}}</td>
+                    <td>{{stat.min_exec_time}}</td>
+                    <td>{{stat.max_exec_time}}</td>
+                    <td>{{stat.mean_exec_time}}</td>
+                    <td>{{stat.rows}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

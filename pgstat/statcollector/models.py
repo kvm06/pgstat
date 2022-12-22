@@ -10,16 +10,10 @@ class Snapshots (models.Model):
     datecr = models.DateTimeField(null=False)
     # Number of times the statement was executed
     calls = models.BigIntegerField(null=False)
+    total_plan_time = models.FloatField(null=False)
+    total_exec_time = models.FloatField(null=False)
     # Number of times the statement was planned( if pg_stat_statements.track_planning is enabled, otherwise zero)
     plans = models.BigIntegerField(null=False)
-    # Total time spent in the statement, in milliseconds
-    total_time = models.FloatField(null=False) # PG < 13, for PG >= 13 total_plan_time + total_exec_time
-    # Minimum time spent in the statement, in milliseconds
-    min_time = models.FloatField(null=False) # PG < 13, for PG >= 13 min_plan_time + min_exec_time
-    # Maximum time spent in the statement, in milliseconds
-    max_time = models.FloatField(null=False) # PG < 13, for PG >= 13 max_plan_time + max_exec_time
-    # Mean time spent in the statement, in milliseconds
-    mean_time = models.FloatField(null=False) # PG < 13, for PG >= 13 mean_plan_time + mean_exec_time
     # Total number of rows retrieved or affected by the statement
     rows = models.BigIntegerField(null=False)
     #Total number of shared block cache hits by the statement
@@ -56,8 +50,8 @@ class Snapshots (models.Model):
     reset_time = models.DateTimeField(null=True)
 
     class Meta:
-        verbose_name = 'QueryStat'
-        verbose_name_plural = 'QueryStats'
+        verbose_name = 'Statement'
+        verbose_name_plural = 'Statements'
         constraints = [
             models.UniqueConstraint(fields=['datecr'], name='datecr_unique')
         ]
@@ -96,14 +90,6 @@ class Statements (models.Model):
     calls = models.BigIntegerField(null=False)
     # Number of times the statement was planned( if pg_stat_statements.track_planning is enabled, otherwise zero)
     plans = models.BigIntegerField(null=False)
-    # Total time spent in the statement, in milliseconds
-    total_time = models.FloatField(null=True) # PG < 13, for PG >= 13 total_plan_time + total_exec_time
-    # Minimum time spent in the statement, in milliseconds
-    min_time = models.FloatField(null=True) # PG < 13, for PG >= 13 min_plan_time + min_exec_time
-    # Maximum time spent in the statement, in milliseconds
-    max_time = models.FloatField(null=True) # PG < 13, for PG >= 13 max_plan_time + max_exec_time
-    # Mean time spent in the statement, in milliseconds
-    mean_time = models.FloatField(null=True) # PG < 13, for PG >= 13 mean_plan_time + mean_exec_time
     # Total time spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
     total_plan_time = models.FloatField(null=True) # PG >= 13
     # Minimum time spent planning the statement, in milliseconds (if pg_stat_statements.track_planning is enabled, otherwise zero)
@@ -158,8 +144,149 @@ class Statements (models.Model):
         verbose_name_plural = 'Statements'
 
         constraints = [
-            models.UniqueConstraint(fields=['datecr', 'dbid', 'userid','queryid'], name='created_dbid_userid_queryid_unique')
+            models.UniqueConstraint(fields=['dbid', 'userid', 'queryid', 'toplevel'], name='dbid_userid_queryid_toplevel_unique')
         ]
+
+class Last_statement (models.Model):
+    # statement executed datetime
+    datecr = models.DateTimeField(null=False)
+    # OID of user who executed the statement
+    userid = models.IntegerField(null=False)
+    # OID of database in which the statement was executed
+    dbid = models.IntegerField(null=False)
+    # Hash code to identify identical normalized queries.
+    queryid = models.BigIntegerField(null=False)
+    # True if the query was executed as a top - level statement(always true if pg_stat_statements.track is set to top)
+    toplevel = models.BooleanField(null=True) # PG >= 14
+    # Number of times the statement was executed
+    calls = models.BigIntegerField(null=False)
+    # Number of times the statement was planned( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    plans = models.BigIntegerField(null=False)
+    # Total time spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    total_plan_time = models.FloatField(null=True) # PG >= 13
+    # Minimum time spent planning the statement, in milliseconds (if pg_stat_statements.track_planning is enabled, otherwise zero)
+    min_plan_time = models.FloatField(null=True) # PG >= 13
+    # Maximum time  spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    max_plan_time = models.FloatField(null=True) # PG >= 13
+    # Mean time spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    mean_plan_time = models.FloatField(null=True) # PG >= 13
+    # Total time spent executing the statement, in milliseconds
+    total_exec_time = models.FloatField(null=True) # PG >= 13
+    # Minimum time spent executing the statement, in milliseconds
+    min_exec_time = models.FloatField(null=True) # PG >= 13
+    # Maximum time spent executing the statement, in milliseconds
+    max_exec_time = models.FloatField(null=True) # PG >= 13
+    # Mean time spent executing the statement, in milliseconds
+    mean_exec_time = models.FloatField(null=True) # PG >= 13
+    # Total number of rows retrieved or affected by the statement
+    rows = models.BigIntegerField(null=False)
+    #Total number of shared block cache hits by the statement
+    shared_blks_hit = models.BigIntegerField(null=False)
+    # Total number of shared blocks read by the statement
+    shared_blks_read = models.BigIntegerField(null=False)
+    # Total  number of shared blocks dirtied by the statement
+    shared_blks_dirtied = models.BigIntegerField(null=False)
+    # Total number of shared blocks written by the statement
+    shared_blks_written = models.BigIntegerField(null=False)
+    #Total number of local blocks cache hits by the statement
+    local_blks_hit = models.BigIntegerField(null=False)
+    # Total number of local blocks read by the statement
+    local_blks_read = models.BigIntegerField(null=False)
+    # Total  number of local blocks dirtied by the statement
+    local_blks_dirtied = models.BigIntegerField(null=False)
+    # Total number of local blocks written by the statement
+    local_blks_written = models.BigIntegerField(null=False)
+    # Total number of temp blocks read by the statement
+    temp_blks_read = models.BigIntegerField(null=False)
+    # Total number of temp blocks written by the statement
+    temp_blks_written = models.BigIntegerField(null=False)
+    # Total time the statement spent reading blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)
+    blk_read_time = models.FloatField(null=False)
+    # Total time the statement spent writing blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)
+    blk_write_time = models.FloatField(null=False)
+    # Total number of WAL records generated by the statement
+    wal_records = models.BigIntegerField(null=True) # PG >= 13
+    # Total number of WAL full page images generated by the statement
+    wal_fpi = models.BigIntegerField(null=True) # PG >= 13
+    # Total amount of WAL generated by the statement in bytes
+    wal_bytes = models.DecimalField(null=True, max_digits=20, decimal_places=0) # PG >= 13
+
+    class Meta:
+        verbose_name = 'Last_statement'
+        verbose_name_plural = 'Last_statements'
+
+        constraints = [
+            models.UniqueConstraint(fields=['dbid', 'userid', 'queryid', 'toplevel'], name='dbid_userid_queryid_toplevel_unique_1')
+        ]
+
+class Statement_details (models.Model):
+    # statement executed datetime
+    datecr = models.DateTimeField(null=False)
+    # OID of user who executed the statement
+    userid = models.IntegerField(null=False)
+    # OID of database in which the statement was executed
+    dbid = models.IntegerField(null=False)
+    # Hash code to identify identical normalized queries.
+    queryid = models.BigIntegerField(null=False)
+    # True if the query was executed as a top - level statement(always true if pg_stat_statements.track is set to top)
+    toplevel = models.BooleanField(null=True) # PG >= 14
+    # Number of times the statement was executed
+    calls = models.BigIntegerField(null=False)
+    # Number of times the statement was planned( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    plans = models.BigIntegerField(null=False)
+    # Total time spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    total_plan_time = models.FloatField(null=True) # PG >= 13
+    # Minimum time spent planning the statement, in milliseconds (if pg_stat_statements.track_planning is enabled, otherwise zero)
+    min_plan_time = models.FloatField(null=True) # PG >= 13
+    # Maximum time  spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    max_plan_time = models.FloatField(null=True) # PG >= 13
+    # Mean time spent planning the statement, in milliseconds( if pg_stat_statements.track_planning is enabled, otherwise zero)
+    mean_plan_time = models.FloatField(null=True) # PG >= 13
+    # Total time spent executing the statement, in milliseconds
+    total_exec_time = models.FloatField(null=True) # PG >= 13
+    # Minimum time spent executing the statement, in milliseconds
+    min_exec_time = models.FloatField(null=True) # PG >= 13
+    # Maximum time spent executing the statement, in milliseconds
+    max_exec_time = models.FloatField(null=True) # PG >= 13
+    # Mean time spent executing the statement, in milliseconds
+    mean_exec_time = models.FloatField(null=True) # PG >= 13
+    # Total number of rows retrieved or affected by the statement
+    rows = models.BigIntegerField(null=False)
+    #Total number of shared block cache hits by the statement
+    shared_blks_hit = models.BigIntegerField(null=False)
+    # Total number of shared blocks read by the statement
+    shared_blks_read = models.BigIntegerField(null=False)
+    # Total  number of shared blocks dirtied by the statement
+    shared_blks_dirtied = models.BigIntegerField(null=False)
+    # Total number of shared blocks written by the statement
+    shared_blks_written = models.BigIntegerField(null=False)
+    #Total number of local blocks cache hits by the statement
+    local_blks_hit = models.BigIntegerField(null=False)
+    # Total number of local blocks read by the statement
+    local_blks_read = models.BigIntegerField(null=False)
+    # Total  number of local blocks dirtied by the statement
+    local_blks_dirtied = models.BigIntegerField(null=False)
+    # Total number of local blocks written by the statement
+    local_blks_written = models.BigIntegerField(null=False)
+    # Total number of temp blocks read by the statement
+    temp_blks_read = models.BigIntegerField(null=False)
+    # Total number of temp blocks written by the statement
+    temp_blks_written = models.BigIntegerField(null=False)
+    # Total time the statement spent reading blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)
+    blk_read_time = models.FloatField(null=False)
+    # Total time the statement spent writing blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)
+    blk_write_time = models.FloatField(null=False)
+    # Total number of WAL records generated by the statement
+    wal_records = models.BigIntegerField(null=True) # PG >= 13
+    # Total number of WAL full page images generated by the statement
+    wal_fpi = models.BigIntegerField(null=True) # PG >= 13
+    # Total amount of WAL generated by the statement in bytes
+    wal_bytes = models.DecimalField(null=True, max_digits=18, decimal_places=0) # PG >= 13
+
+    class Meta:
+        verbose_name = 'Statement_detail'
+        verbose_name_plural = 'Statements_details'
+
 
 class Tickets(models.Model):
     ticket_no = models.CharField(primary_key=True, max_length=13)

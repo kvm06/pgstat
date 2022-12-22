@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="stat_detail">
+        <table>
+            <thead>
+            <tr>
+                <th>datecr</th>
+                <th>userid</th>
+                <th>dbid</th>
+                <th>toplevel</th>
+                <th>queryid</th>
+                <th>calls</th>
+                <th>total_exec_time</th>
+                <th>min_exec_time</th>
+                <th>max_exec_time</th>
+                <th>mean_exec_time</th>
+                <th>rows</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{stat.datecr}}</td>
+                    <td>{{stat.userid}}</td>
+                    <td>{{stat.dbid}}</td>
+                    <td>{{stat.toplevel}}</td>
+                    <td>{{queryid}}</td>
+                    <td>{{stat.calls}}</td>
+                    <td>{{stat.total_exec_time}}</td>
+                    <td>{{stat.min_exec_time}}</td>
+                    <td>{{stat.max_exec_time}}</td>
+                    <td>{{stat.mean_exec_time}}</td>
+                    <td>{{stat.rows}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
