@@ -3,6 +3,17 @@
 Итоговый проект по курсу "Базы данных" на otus
 
 Описание:
+В БД PostgreSQL есть расширение pg_stat_statements, которое позволяет просматривать статистику
+о выполненных запросах по всему кластеру БД. 
+В связи с тем, что статистика собираемая данным расширением является кумулятивной, в определенных случаях,
+информации недостаточно для анализа запросов. 
+Данная система позволяет собирать детализованную статистику - не только за весь период, но также 
+за минуту, день, неделю, месяц. 
+Также система позволяет группировать запросы по базе данных, пользователю, уровню запроса (вложенный/невложенный)
+Система также позволяет просматривать статистику по отдельному запросу.
+
+Диаграмма
+https://github.com/kvm06/db_course/blob/main/%D0%94%D0%B8%D0%B0%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0.png
 
 Начало работы
 ### 1. Установка расширения pg_stat_statements (https://www.postgresql.org/docs/current/pgstatstatements.html)
@@ -48,13 +59,11 @@ grant pg_read_all_stats to cron_user;
 host    all             cron_user       127.0.0.1/32            trust
 ```
 Теперь можно создавать задания для запуска функций по расписанию. 
-SELECT cron.schedule(
-  '1 * * * *',
-  $$INSERT INTO cron_test VALUES ('Hello World', now() )$$
-);
+Основные команды:
+SELECT cron.schedule('cron-задание'); 
 SELECT * FROM cron.job;
-SELECT cron.unschedule(2);
 SELECT * FROM cron.job_run_details
+SELECT cron.unschedule(2);
 
 ### 3. Создаем процедуру save_data()
 Процедура save_data сохраняет текущее состояние расширения pg_stat_statements
@@ -74,4 +83,5 @@ SELECT * FROM cron.job_run_details
   '* * * * *',
   $$CALL save_data();$$;
 ``
+
 Данное задание будет запускаться каждую минуту и запускать процедуру save_data()
