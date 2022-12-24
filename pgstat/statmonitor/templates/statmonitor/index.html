@@ -6,22 +6,23 @@
 </head>
 <body>
     <div class="stats_all">
-        <form method="GET">
-            <h4>Группировать запросы по:</h4>
-            <input type="checkbox" id="group_db_checkbox">
-            <label for="group_db_checkbox">Базе данных</label>
-            <input type="checkbox"  id="group_user_checkbox">
-            <label for="group_user_checkbox">Пользователям</label>
-            <input type="checkbox"  id="group_level_checkbox">
-            <label for="group_level_checkbox">Уровеню запроса</label>
-            <label for="period_select">По периоду</label>
-            <select name="period" id="period_select">
-              <option value="minute">Минута</option>
-              <option value="hour">Час</option>
-              <option value="day">День</option>
-              <option value="week">Неделя</option>
-              <option value="month">Месяц</option>
-            </select><br>
+        <h4>Сгруппировать статистику по:</h4>
+        <form method="GET" action="{% url 'index' %}">
+            {{ filter_form.as_p }}
+<!--            <input type="checkbox" id="group_db_checkbox">-->
+<!--            <label for="group_db_checkbox">Базе данных</label>-->
+<!--            <input type="checkbox"  id="group_user_checkbox">-->
+<!--            <label for="group_user_checkbox">Пользователям</label>-->
+<!--            <input type="checkbox"  id="group_level_checkbox">-->
+<!--            <label for="group_level_checkbox">Уровеню запроса</label>-->
+<!--            <label for="period_select">По периоду</label>-->
+<!--            <select name="period" id="period_select">-->
+<!--              <option value="minute">Минута</option>-->
+<!--              <option value="hour">Час</option>-->
+<!--              <option value="day">День</option>-->
+<!--              <option value="week">Неделя</option>-->
+<!--              <option value="month">Месяц</option>-->
+<!--            </select><br>-->
 <!--            {{ statements_filter.form.as_p }}-->
             <input type="submit" value="Применить фильтр"/>
         </form>
@@ -55,12 +56,30 @@
                 {% for stat in statements %}
                 {% load filters %}
                 <tr>
-                    <td style="border:1px solid green; padding: 5px">{{stat.datecr}}</td>
-                    <td style="border:1px solid green; padding: 5px">{{stat.rolname}}</td>
-                    <td style="border:1px solid green; padding: 5px">{{stat.datname}}</td>
-                    <td style="border:1px solid green; padding: 5px"><a href="{% url 'query' stat.stat_id %}">{{stat.queryid}}</a></td>
+                    {% if stat.query_minute %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.query_minute |date:"d.m.Y H:i:s"}}</td>
+                    {% elif stat.query_hour %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.query_hour |date:"d.m.Y H:i:s"}}</td>
+                    {% elif stat.query_day %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.query_day |date:"d.m.Y H:i:s"}}</td>
+                    {% elif stat.query_week %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.query_week |date:"d.m.Y H:i:s"}}</td>
+                    {% elif stat.query_month %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.query_month |date:"d.m.Y H:i:s"}}</td>
+                    {% endif %}
+                    {% if stat.rolname_aggr %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.rolname_aggr}}</td>
+                    {% else %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.rolname}}</td>
+                    {% endif %}
+                    {% if stat.datname_aggr %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.datname_aggr}}</td>
+                    {% else %}
+                        <td style="border:1px solid green; padding: 5px">{{stat.datnam}}</td>
+                    {% endif %}
+                    <td style="border:1px solid green; padding: 5px">{{stat.queryid}}</td>
                     <td style="border:1px solid green; padding: 5px">{{stat.calls}}</td>
-                    <td style="border:1px solid green; padding: 5px">{{stat.total_exec_time | ms_to_sec}}</td>
+                    <td style="border:1px solid green; padding: 5px">{{stat.total_exec_time}}</td>
                     <td style="border:1px solid green; padding: 5px">{{stat.rows}}</td>
                     <td style="border:1px solid green; padding: 5px">{{stat.shared_blks_read_size | pretty_size}}</td>
                     <td style="border:1px solid green; padding: 5px">{{stat.local_blks_read_size | pretty_size}}</td>
