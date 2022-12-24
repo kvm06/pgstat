@@ -1,0 +1,23 @@
+{% load static %}
+<div class="stat_filter">
+    <h4>Сгруппировать статистику по:</h4>
+    <form method="GET">
+        {{ filter_form.as_p }}
+    <!--            <input type="checkbox" id="group_db_checkbox">-->
+    <!--            <label for="group_db_checkbox">Базе данных</label>-->
+    <!--            <input type="checkbox"  id="group_user_checkbox">-->
+    <!--            <label for="group_user_checkbox">Пользователям</label>-->
+    <!--            <input type="checkbox"  id="group_level_checkbox">-->
+    <!--            <label for="group_level_checkbox">Уровеню запроса</label>-->
+    <!--            <label for="period_select">По периоду</label>-->
+    <!--            <select name="period" id="period_select">-->
+    <!--              <option value="minute">Минута</option>-->
+    <!--              <option value="hour">Час</option>-->
+    <!--              <option value="day">День</option>-->
+    <!--              <option value="week">Неделя</option>-->
+    <!--              <option value="month">Месяц</option>-->
+    <!--            </select><br>-->
+    <!--            {{ statements_filter.form.as_p }}-->
+        <input type="submit" value="Применить фильтр"/>
+    </form>
+</div>
