@@ -42,7 +42,6 @@ create extension pg_cron;
 ```
 create user cron_user with password 'password';
 grant pg_read_all_stats to cron_user;
-grant all privileges on all tables in schema public to cron_user;
 ```
 В файле pg_hba.conf разрешаем пользователю подключаться к БД
 ```
@@ -57,8 +56,22 @@ SELECT * FROM cron.job;
 SELECT cron.unschedule(2);
 SELECT * FROM cron.job_run_details
 
-### 3. Создаем задание на ежеминутное сохранение скриншотов из pg_stat_statements
-```SELECT cron.schedule(
+### 3. Создаем процедуру save_data()
+Процедура save_data сохраняет текущее состояние расширения pg_stat_statements
+в таблице statcollector_last_statement. Для каждого уникального сочетания - база данных + пользователь + запрос + уровень запроса + дата сброса
+статистики создается отдельная запись. Если в таблице уже есть запись с совпадающим ключем, данные
+этих записей обновляются. Если записей нет, вставляются новые записи. 
+Дату последнего сброса статистики получаем из расширения pg_stat_statements_info()
+
+### 4. Создаем триггер для сохранения данных снятых за промежуток между вызовами функции
+Триггер statcollector_last_statement_iud(), срабатывает при вставке/обновлении
+значений в таблицу statcollector_last_statement. Он сравнивает предыдущие значения 
+таблицы с новыми и сохраняет в таблицу statcollector_statement_details 
+разницу между этими значениями. 
+
+### 5. Создаем задание на ежеминутное сохранение скриншотов из pg_stat_statements
+``SELECT cron.schedule(
   '* * * * *',
-  $$CALL create_snapshot();$$;
-```
+  $$CALL save_data();$$;
+``
+Данное задание будет запускаться каждую минуту и запускать процедуру save_data()
