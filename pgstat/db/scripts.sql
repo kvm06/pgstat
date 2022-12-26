@@ -55,7 +55,7 @@ BEGIN
 		local_blks_written = EXCLUDED.local_blks_written,
 		temp_blks_read = EXCLUDED.temp_blks_read,
 		temp_blks_written = EXCLUDED.temp_blks_written
-    WHERE calls < EXCLUDED.calls;
+    WHERE statcollector_last_statement.calls < EXCLUDED.calls;
 END;
 $BODY$;
 
