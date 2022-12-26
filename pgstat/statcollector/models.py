@@ -127,6 +127,45 @@ class Last_statement (models.Model):
             models.UniqueConstraint(fields=['dbid', 'userid', 'queryid', 'toplevel', 'reset_time'], name='dbid_userid_queryid_toplevel_unique_reset_time_unq')
         ]
 
+class Statements(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    datecr = models.DateTimeField()
+    userid = models.IntegerField()
+    dbid = models.IntegerField()
+    queryid = models.BigIntegerField()
+    toplevel = models.BooleanField(blank=True, null=True)
+    calls = models.BigIntegerField()
+    plans = models.BigIntegerField()
+    total_plan_time = models.FloatField(blank=True, null=True)
+    min_plan_time = models.FloatField(blank=True, null=True)
+    max_plan_time = models.FloatField(blank=True, null=True)
+    mean_plan_time = models.FloatField(blank=True, null=True)
+    total_exec_time = models.FloatField(blank=True, null=True)
+    min_exec_time = models.FloatField(blank=True, null=True)
+    max_exec_time = models.FloatField(blank=True, null=True)
+    mean_exec_time = models.FloatField(blank=True, null=True)
+    rows = models.BigIntegerField()
+    shared_blks_hit = models.BigIntegerField()
+    shared_blks_read = models.BigIntegerField()
+    shared_blks_dirtied = models.BigIntegerField()
+    shared_blks_written = models.BigIntegerField()
+    local_blks_hit = models.BigIntegerField()
+    local_blks_read = models.BigIntegerField()
+    local_blks_dirtied = models.BigIntegerField()
+    local_blks_written = models.BigIntegerField()
+    temp_blks_read = models.BigIntegerField()
+    temp_blks_written = models.BigIntegerField()
+    blk_read_time = models.FloatField()
+    blk_write_time = models.FloatField()
+    wal_records = models.BigIntegerField(blank=True, null=True)
+    wal_fpi = models.BigIntegerField(blank=True, null=True)
+    wal_bytes = models.DecimalField(max_digits=18, decimal_places=0, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'statcollector_statements'
+        unique_together = (('datecr', 'dbid', 'userid', 'queryid', 'toplevel'),)
+
 class Statement_details (models.Model):
     # statement executed datetime
     datecr = models.DateTimeField(null=False)
